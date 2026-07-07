@@ -1,0 +1,8 @@
+{
+  "appId": "br.com.termaspacu.recebimento",
+  "appName": "Recebimento Termas Pacu",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false
+  }
+}
