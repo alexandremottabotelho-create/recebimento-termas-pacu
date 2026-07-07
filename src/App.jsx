@@ -49,11 +49,25 @@ function qtdDivergente(item) {
 function calcularVolume(g) {
   const n = (x) => parseFloat(String(x).replace(",", ".")) || 0;
   if (g.modoMedicao === "4 Pontos") {
-    const largMedia = (n(g.largEsq) + n(g.largDir)) / 2;
-    const altMedia = (n(g.alt1) + n(g.alt2) + n(g.alt3) + n(g.alt4)) / 4;
-    return { largura: largMedia, altura: altMedia, volume: n(g.comprimento) * largMedia * altMedia };
+    // Método da pilha (Lenha/Toco): 4 pontos por lado = 8 alturas.
+    // Volume = média das 8 alturas × Qtd Pilhas × comprimento médio do caminhão.
+    const alturas = [g.h1, g.h2, g.h3, g.h4, g.h5, g.h6, g.h7, g.h8].map(n);
+    const somaAlturas = alturas.reduce((a, b) => a + b, 0);
+    const altMedia = somaAlturas / 8;
+    const pilhas = n(g.pilhas);
+    const comps = [g.cmp1, g.cmp2, g.cmp3, g.cmp4].map(n).filter((v) => v > 0);
+    const compMedia = comps.length ? comps.reduce((a, b) => a + b, 0) / comps.length : 0;
+    return {
+      comprimento: compMedia,
+      largura: pilhas,
+      altura: altMedia,
+      pilhas,
+      somaAlturas,
+      volume: altMedia * pilhas * compMedia,
+    };
   }
-  return { largura: n(g.largura), altura: n(g.altura), volume: n(g.comprimento) * n(g.largura) * n(g.altura) };
+  const largura = n(g.largura), altura = n(g.altura), comprimento = n(g.comprimento);
+  return { comprimento, largura, altura, volume: comprimento * largura * altura };
 }
 
 // Comprime a foto: máx 1280px, JPEG qualidade 0.7, retorna base64 puro (sem prefixo data:)
@@ -99,15 +113,24 @@ const ITEM_VAZIO = {
   granel: false,
   material: "Lenha",
   modoMedicao: "Padrão",
+  // Padrão (C×L×A)
   comprimento: "",
   largura: "",
   altura: "",
-  largEsq: "",
-  largDir: "",
-  alt1: "",
-  alt2: "",
-  alt3: "",
-  alt4: "",
+  // 4 Pontos (Lenha/Toco): Qtd Pilhas, comprimentos do caminhão e 8 alturas
+  pilhas: "2",
+  cmp1: "",
+  cmp2: "",
+  cmp3: "",
+  cmp4: "",
+  h1: "",
+  h2: "",
+  h3: "",
+  h4: "",
+  h5: "",
+  h6: "",
+  h7: "",
+  h8: "",
 };
 
 const FOTOS_AB = [
@@ -423,7 +446,11 @@ function TelaItem({ inicial, aoSalvar, aoCancelar }) {
                     className={estiloInput}
                     value={item.material}
                     onChange={(e) =>
-                      setItem({ ...item, material: e.target.value, modoMedicao: e.target.value === "Lenha" ? item.modoMedicao : "Padrão" })
+                      setItem({
+                        ...item,
+                        material: e.target.value,
+                        modoMedicao: e.target.value === "Lenha" || e.target.value === "Toco" ? item.modoMedicao : "Padrão",
+                      })
                     }
                   >
                     {MATERIAIS_GRANEL.map((m) => (
@@ -432,7 +459,7 @@ function TelaItem({ inicial, aoSalvar, aoCancelar }) {
                   </select>
                 </Campo>
 
-                {item.material === "Lenha" && (
+                {(item.material === "Lenha" || item.material === "Toco") && (
                   <div className="grid grid-cols-2 gap-2">
                     {["Padrão", "4 Pontos"].map((m) => (
                       <button
@@ -442,29 +469,20 @@ function TelaItem({ inicial, aoSalvar, aoCancelar }) {
                           item.modoMedicao === m ? "bg-teal-700 text-white border-teal-700" : "bg-white text-slate-500 border-slate-200"
                         }`}
                       >
-                        {m === "Padrão" ? "Padrão (C×L×A)" : "4 Pontos (carga irregular)"}
+                        {m === "Padrão" ? "Padrão (C×L×A)" : "4 Pontos (pilha)"}
                       </button>
                     ))}
                   </div>
                 )}
 
-                <Campo rotulo="Comprimento (m)">
-                  <input type="number" inputMode="decimal" className={estiloInput} value={item.comprimento} onChange={alt("comprimento")} />
-                </Campo>
-
                 {item.modoMedicao === "4 Pontos" ? (
                   <>
-                    <div className="grid grid-cols-2 gap-3">
-                      <Campo rotulo="Largura esq. (m)">
-                        <input type="number" inputMode="decimal" className={estiloInput} value={item.largEsq} onChange={alt("largEsq")} />
-                      </Campo>
-                      <Campo rotulo="Largura dir. (m)">
-                        <input type="number" inputMode="decimal" className={estiloInput} value={item.largDir} onChange={alt("largDir")} />
-                      </Campo>
-                    </div>
-                    <span className="text-sm font-medium text-slate-600 block">Altura nos 4 cantos (m)</span>
+                    <Campo rotulo="Qtd. Pilhas">
+                      <input type="number" inputMode="decimal" className={estiloInput} value={item.pilhas} onChange={alt("pilhas")} />
+                    </Campo>
+                    <span className="text-sm font-medium text-slate-600 block">Comprimento do caminhão (m) — até 4 medições</span>
                     <div className="grid grid-cols-4 gap-2">
-                      {["alt1", "alt2", "alt3", "alt4"].map((c, i) => (
+                      {["cmp1", "cmp2", "cmp3", "cmp4"].map((c, i) => (
                         <input
                           key={c}
                           type="number"
@@ -476,16 +494,49 @@ function TelaItem({ inicial, aoSalvar, aoCancelar }) {
                         />
                       ))}
                     </div>
+                    <span className="text-sm font-medium text-slate-600 block">Altura — 1º lado (4 pontos, m)</span>
+                    <div className="grid grid-cols-4 gap-2">
+                      {["h1", "h2", "h3", "h4"].map((c, i) => (
+                        <input
+                          key={c}
+                          type="number"
+                          inputMode="decimal"
+                          placeholder={`${i + 1}ª`}
+                          className={estiloInput + " px-2 text-center"}
+                          value={item[c]}
+                          onChange={alt(c)}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm font-medium text-slate-600 block">Altura — 2º lado (4 pontos, m)</span>
+                    <div className="grid grid-cols-4 gap-2">
+                      {["h5", "h6", "h7", "h8"].map((c, i) => (
+                        <input
+                          key={c}
+                          type="number"
+                          inputMode="decimal"
+                          placeholder={`${i + 5}ª`}
+                          className={estiloInput + " px-2 text-center"}
+                          value={item[c]}
+                          onChange={alt(c)}
+                        />
+                      ))}
+                    </div>
                   </>
                 ) : (
-                  <div className="grid grid-cols-2 gap-3">
-                    <Campo rotulo="Largura (m)">
-                      <input type="number" inputMode="decimal" className={estiloInput} value={item.largura} onChange={alt("largura")} />
+                  <>
+                    <Campo rotulo="Comprimento (m)">
+                      <input type="number" inputMode="decimal" className={estiloInput} value={item.comprimento} onChange={alt("comprimento")} />
                     </Campo>
-                    <Campo rotulo="Altura (m)">
-                      <input type="number" inputMode="decimal" className={estiloInput} value={item.altura} onChange={alt("altura")} />
-                    </Campo>
-                  </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Campo rotulo="Largura (m)">
+                        <input type="number" inputMode="decimal" className={estiloInput} value={item.largura} onChange={alt("largura")} />
+                      </Campo>
+                      <Campo rotulo="Altura (m)">
+                        <input type="number" inputMode="decimal" className={estiloInput} value={item.altura} onChange={alt("altura")} />
+                      </Campo>
+                    </div>
+                  </>
                 )}
 
                 <div className="bg-teal-50 border border-teal-200 rounded-xl px-4 py-3 text-center">
@@ -493,7 +544,7 @@ function TelaItem({ inicial, aoSalvar, aoCancelar }) {
                   <p className="text-2xl font-bold text-teal-800">{medicao.volume.toFixed(3)} m³</p>
                   {item.modoMedicao === "4 Pontos" && (
                     <p className="text-xs text-teal-600 mt-1">
-                      Largura média: {medicao.largura.toFixed(2)} m · Altura média: {medicao.altura.toFixed(2)} m
+                      Altura média: {medicao.altura.toFixed(4)} m · Pilhas: {medicao.pilhas} · Comp. médio: {medicao.comprimento.toFixed(2)} m
                     </p>
                   )}
                 </div>
@@ -579,7 +630,7 @@ function BotaoFoto({ rotulo, base64, aoCapturar, aoRemover }) {
 
 // ============ TELA: CONFERÊNCIA ============
 function TelaConferencia({ usuario, aoSair }) {
-  const [cabecalho, setCabecalho] = useState({ fornecedor: "", nf: "", prazoNegociado: "" });
+  const [cabecalho, setCabecalho] = useState({ fornecedor: "", nf: "", pedido: "", prazoNegociado: "" });
   const [itens, setItens] = useState([]);
   const [fotos, setFotos] = useState({});
   const [editando, setEditando] = useState(null); // null | -1 (novo) | índice
@@ -605,6 +656,7 @@ function TelaConferencia({ usuario, aoSair }) {
         setor: usuario.setor || "Portaria",
         fornecedor: cabecalho.fornecedor,
         nf: cabecalho.nf,
+        pedido: cabecalho.pedido,
         prazoNegociado: cabecalho.prazoNegociado,
         categoria: it.categoria,
         descricao: it.descricao,
@@ -618,7 +670,7 @@ function TelaConferencia({ usuario, aoSair }) {
         granel: it.granel ? "Sim" : "Não",
         material: it.granel ? it.material : "",
         modoMedicao: it.granel ? it.modoMedicao : "",
-        comprimento: it.granel ? it.comprimento : "",
+        comprimento: it.granel ? m.comprimento.toFixed(2) : "",
         largura: it.granel ? m.largura.toFixed(2) : "",
         altura: it.granel ? m.altura.toFixed(2) : "",
         volumeM3: it.granel ? m.volume.toFixed(3) : "",
@@ -628,7 +680,7 @@ function TelaConferencia({ usuario, aoSair }) {
 
     const payload = {
       tipo: "CONFERENCIA",
-      cabecalho: { dataHora, conferente: usuario.nome, fornecedor: cabecalho.fornecedor, nf: cabecalho.nf },
+      cabecalho: { dataHora, conferente: usuario.nome, fornecedor: cabecalho.fornecedor, nf: cabecalho.nf, pedido: cabecalho.pedido },
       linhas,
       fotos,
     };
@@ -640,7 +692,7 @@ function TelaConferencia({ usuario, aoSair }) {
       const json = await resp.json();
       if (json.ok) {
         setResultado({ ok: true, mensagem: "Conferência enviada com sucesso!" });
-        setCabecalho({ fornecedor: "", nf: "", prazoNegociado: "" });
+        setCabecalho({ fornecedor: "", nf: "", pedido: "", prazoNegociado: "" });
         setItens([]);
         setFotos({});
       } else {
@@ -693,10 +745,13 @@ function TelaConferencia({ usuario, aoSair }) {
             <Campo rotulo="Nº da NF *">
               <input className={estiloInput} value={cabecalho.nf} onChange={alt("nf")} inputMode="numeric" />
             </Campo>
-            <Campo rotulo="Prazo negociado">
-              <input className={estiloInput} value={cabecalho.prazoNegociado} onChange={alt("prazoNegociado")} placeholder="Ex.: 28 dias" />
+            <Campo rotulo="Nº Pedido/Requisição">
+              <input className={estiloInput} value={cabecalho.pedido} onChange={alt("pedido")} placeholder="Opcional" />
             </Campo>
           </div>
+          <Campo rotulo="Prazo negociado">
+            <input className={estiloInput} value={cabecalho.prazoNegociado} onChange={alt("prazoNegociado")} placeholder="Ex.: 28 dias" />
+          </Campo>
         </div>
 
         {/* Itens */}

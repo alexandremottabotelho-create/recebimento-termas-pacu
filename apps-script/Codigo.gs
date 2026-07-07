@@ -48,7 +48,7 @@ function doPost(e) {
     var ss = getPlanilha();
     var sh = ss.getSheetByName("CONFERENCIA") || ss.insertSheet("CONFERENCIA");
     if (sh.getLastRow() === 0) {
-      sh.appendRow(["Data/Hora","Conferente","Setor","Fornecedor","NF","Prazo Negociado",
+      sh.appendRow(["Data/Hora","Conferente","Setor","Fornecedor","NF","Pedido/Requisição","Prazo Negociado",
         "Categoria","Descrição","Lote","Validade","Qtd Pedida","Qtd Entregue","Unidade",
         "Valor","Status","Granel","Material","Modo Medição","Comprimento","Largura","Altura",
         "Volume m³","Observações",
@@ -68,7 +68,7 @@ function doPost(e) {
 
     data.linhas.forEach(function(l, idx){
       var p = idx === 0;
-      sh.appendRow([l.dataHora,l.conferente,l.setor,l.fornecedor,l.nf,l.prazoNegociado,
+      sh.appendRow([l.dataHora,l.conferente,l.setor,l.fornecedor,l.nf,l.pedido,l.prazoNegociado,
         l.categoria,l.descricao,l.lote,l.validade,l.qtdPedida,l.qtdEntregue,l.unidade,
         l.valor,l.status,l.granel,l.material,l.modoMedicao,l.comprimento,l.largura,l.altura,
         l.volumeM3,l.observacoes,
