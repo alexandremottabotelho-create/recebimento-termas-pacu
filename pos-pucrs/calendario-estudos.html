@@ -1,0 +1,218 @@
+<title>Calendário de Estudos PUCRS</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: resumo e próxima sessão no topo, grade mensal no meio, roteiro em lista com marcação no fim. */
+:root {
+  --bg: #f3f6f9; --surface: #ffffff; --ink: #17212c; --muted: #5a6978; --line: #d9e0e7; --today: #17212c;
+  --cus: #0f766e; --ia: #4648d8; --gro: #a8560a; --tax: #b8195e; --esg: #3b7a1d;
+  --danger: #c0281f; --on-solid: #ffffff;
+  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --body: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10161d; --surface: #18212b; --ink: #e8eef4; --muted: #96a5b4; --line: #2b3744; --today: #e8eef4;
+    --cus: #4fd1c5; --ia: #9da0ff; --gro: #f2a65a; --tax: #f58ab8; --esg: #8fd16a;
+    --danger: #ff8a80; --on-solid: #10161d; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10161d; --surface: #18212b; --ink: #e8eef4; --muted: #96a5b4; --line: #2b3744; --today: #e8eef4;
+  --cus: #4fd1c5; --ia: #9da0ff; --gro: #f2a65a; --tax: #f58ab8; --esg: #8fd16a;
+  --danger: #ff8a80; --on-solid: #10161d; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 28px; }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.2rem; font-weight: 600; }
+.sub { color: var(--muted); margin: 6px 0 0; max-width: 65ch; }
+.top { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; min-width: 0; }
+.label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 600; }
+.next-title { font-family: var(--display); font-size: 1.15rem; font-weight: 600; margin-top: 6px; }
+.next-detail { color: var(--muted); margin-top: 2px; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px; }
+.stat b { display: block; font-family: var(--display); font-size: 1.4rem; font-variant-numeric: tabular-nums; }
+.stat span { color: var(--muted); font-size: 0.82rem; }
+.bar { height: 6px; background: var(--line); border-radius: 3px; margin-top: 12px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--cus); width: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 0.85rem; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 10px; height: 10px; border-radius: 3px; background: var(--c); flex: none; }
+.months { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.month h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; text-transform: capitalize; }
+.grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.dow { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); text-align: center; padding-bottom: 2px; }
+.day { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; min-height: 58px; padding: 4px; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.day.empty { background: transparent; border-color: transparent; }
+.day.is-today { border-color: var(--today); box-shadow: inset 0 0 0 1px var(--today); }
+.num { font-size: 0.75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.is-today .num { color: var(--ink); font-weight: 600; }
+.chip { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.02em; border-radius: 4px; padding: 2px 3px; text-align: center; color: var(--c);
+  background: color-mix(in srgb, var(--c) 15%, var(--surface)); overflow: hidden; text-overflow: clip; white-space: nowrap; }
+.chip.test { background: var(--c); color: var(--on-solid); }
+.chip.due { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+.chip.done { opacity: 0.45; text-decoration: line-through; }
+.agenda { display: flex; flex-direction: column; gap: 22px; }
+.disc { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.disc header { padding: 12px 16px; border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.disc header h3 { font-size: 1rem; font-weight: 600; color: var(--c); }
+.disc header span { color: var(--muted); font-size: 0.85rem; }
+.row { display: grid; grid-template-columns: auto 92px 1fr; gap: 12px; align-items: start; padding: 9px 16px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.row:last-child { border-bottom: 0; }
+.row input { width: 17px; height: 17px; margin-top: 2px; accent-color: var(--c); cursor: pointer; }
+.row input:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+.when { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 0.88rem; }
+.what { min-width: 0; }
+.row.is-test .what { font-weight: 600; }
+.row.is-due { cursor: default; grid-template-columns: 17px 92px 1fr; }
+.row.is-due .what { color: var(--danger); font-weight: 600; }
+.row.checked .what, .row.checked .when { opacity: 0.5; text-decoration: line-through; }
+.note { color: var(--muted); font-size: 0.85rem; max-width: 70ch; }
+@media (max-width: 720px) { .top { grid-template-columns: 1fr; } h1 { font-size: 1.45rem; } }
+@media (max-width: 420px) { .row { grid-template-columns: auto 74px 1fr; gap: 8px; padding-inline: 12px; } .row.is-due { grid-template-columns: 17px 74px 1fr; } .chip { font-size: 0.6rem; } }
+</style>
+
+<div class="wrap">
+  <div>
+    <h1>Calendário de Estudos PUCRS</h1>
+    <p class="sub">MBA em Controladoria, Estratégia Financeira e Fiscal. Duas horas por dia, de segunda a sábado, das 20h às 22h. Domingo fica livre para folga ou reposição.</p>
+  </div>
+
+  <div class="top">
+    <div class="panel">
+      <div class="label" id="next-label">Próxima sessão</div>
+      <div class="next-title" id="next-title"></div>
+      <div class="next-detail" id="next-detail"></div>
+    </div>
+    <div class="panel">
+      <div class="label">Andamento</div>
+      <div class="stats">
+        <div class="stat"><b id="s-done">0/33</b><span>sessões feitas</span></div>
+        <div class="stat"><b id="s-hours">66h</b><span>horas restantes</span></div>
+        <div class="stat"><b>29/12</b><span>último teste</span></div>
+      </div>
+      <div class="bar"><i id="bar"></i></div>
+    </div>
+  </div>
+
+  <div class="legend" id="legend"></div>
+  <div class="months" id="months"></div>
+
+  <div>
+    <h2>Roteiro por disciplina</h2>
+    <p class="sub">Marque cada sessão ao concluir. A marcação fica salva só neste navegador.</p>
+  </div>
+  <div class="agenda" id="agenda"></div>
+
+  <p class="note">Somente o prazo de Otimização de Custos (06/12/2026) está confirmado na Sala Virtual. Os outros quatro foram deduzidos da data de abertura da recuperação e precisam ser conferidos no item Teste Online de cada disciplina. Cada teste tem 10 questões, 2 horas de duração e 5 tentativas; ao atingir nota 6, a nota trava.</p>
+</div>
+
+<script>
+const DISC = [
+  { id: "cus", sigla: "CUSTOS", nome: "Otimização de Custos, Contabilidade e Gestão Orçamentária", prazo: "2026-12-06", ok: true,
+    s: [["2026-11-19", "Aula 02 vídeo 4 + Aula 03 vídeo 1"], ["2026-11-20", "Aula 03 vídeos 2 e 3"], ["2026-11-21", "Aula 03 vídeo 4 + Livro da Disciplina"], ["2026-11-23", "Revisão das 3 aulas + simulado"]], teste: "2026-11-24" },
+  { id: "ia", sigla: "IA", nome: "IA, automação e Internet das Coisas", prazo: "2026-12-20",
+    s: [["2026-11-25", "Aula 01, vídeos 1 e 2"], ["2026-11-26", "Aula 01, vídeos 3 e 4"], ["2026-11-27", "Aula 02, vídeos 1 e 2"], ["2026-11-28", "Aula 02, vídeos 3 e 4"], ["2026-11-30", "Aula 03, vídeos 1 e 2"], ["2026-12-01", "Aula 03, vídeos 3 e 4 + Livro e revisão"]], teste: "2026-12-02" },
+  { id: "gro", sigla: "GROWTH", nome: "Growth Hacking e aceleração de negócios", prazo: "2027-01-03",
+    s: [["2026-12-03", "Aula 01, vídeos 1 e 2"], ["2026-12-04", "Aula 01, vídeos 3 e 4"], ["2026-12-05", "Aula 02, vídeos 1 e 2"], ["2026-12-07", "Aula 02, vídeos 3 e 4"], ["2026-12-08", "Aula 03, vídeos 1 e 2"], ["2026-12-09", "Aula 03, vídeos 3 e 4 + Livro e revisão"]], teste: "2026-12-10" },
+  { id: "tax", sigla: "TAX", nome: "Tax: Gestão de Tributos Indiretos", prazo: "2027-01-16",
+    s: [["2026-12-11", "Aula 01, vídeos 1 e 2"], ["2026-12-12", "Aula 01, vídeos 3 e 4"], ["2026-12-14", "Aula 02, vídeos 1 e 2"], ["2026-12-15", "Aula 02, vídeos 3 e 4"], ["2026-12-16", "Aula 03, vídeos 1 e 2"], ["2026-12-17", "Aula 03, vídeos 3 e 4 + Livro e revisão"]], teste: "2026-12-18" },
+  { id: "esg", sigla: "ESG", nome: "Investimentos e Títulos ESG", prazo: "2027-01-28",
+    s: [["2026-12-19", "Aula 01, vídeos 1 e 2"], ["2026-12-21", "Aula 01, vídeos 3 e 4"], ["2026-12-22", "Aula 02, vídeos 1 e 2"], ["2026-12-23", "Aula 02, vídeos 3 e 4"], ["2026-12-26", "Aula 03, vídeos 1 e 2"], ["2026-12-28", "Aula 03, vídeos 3 e 4 + Livro e revisão"]], teste: "2026-12-29" }
+];
+const KEY = "pucrs-estudos-feitos";
+let done = {};
+try { done = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { done = {}; }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (e) {} };
+
+const parse = iso => { const [y, m, d] = iso.split("-").map(Number); return new Date(y, m - 1, d); };
+const iso = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const DOW = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
+const fmt = s => { const d = parse(s); return DOW[d.getDay()] + " " + String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0"); };
+const todayIso = iso(new Date());
+
+// Lista única de itens: estudo, teste e prazo
+const items = [];
+DISC.forEach(d => {
+  d.s.forEach(([dt, txt]) => items.push({ dt, disc: d, tipo: "estudo", txt, key: d.id + dt }));
+  items.push({ dt: d.teste, disc: d, tipo: "teste", txt: "Teste Online (2 horas)", key: d.id + "T" });
+  items.push({ dt: d.prazo, disc: d, tipo: "prazo", txt: "Prazo final do teste, 23:59" + (d.ok ? "" : " (confirmar data)") });
+});
+const sessoes = items.filter(i => i.tipo !== "prazo").sort((a, b) => a.dt.localeCompare(b.dt));
+
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+function renderLegend() {
+  const box = document.getElementById("legend");
+  DISC.forEach(d => { const s = el("span"); const dot = el("i", "dot"); dot.style.setProperty("--c", "var(--" + d.id + ")"); s.append(dot, d.nome); box.append(s); });
+  const t = el("span", null, "Cheio = dia de teste"); const p = el("span", null, "Contorno vermelho = prazo final");
+  box.append(t, p);
+}
+
+function renderMonths() {
+  const box = document.getElementById("months"); box.textContent = "";
+  [[2026, 10], [2026, 11], [2027, 0]].forEach(([y, m]) => {
+    const wrap = el("div", "month");
+    wrap.append(el("h3", null, new Date(y, m, 1).toLocaleDateString("pt-BR", { month: "long", year: "numeric" })));
+    const grid = el("div", "grid");
+    DOW.forEach(n => grid.append(el("div", "dow", n)));
+    const first = new Date(y, m, 1).getDay(), total = new Date(y, m + 1, 0).getDate();
+    for (let i = 0; i < first; i++) grid.append(el("div", "day empty"));
+    for (let d = 1; d <= total; d++) {
+      const key = iso(new Date(y, m, d));
+      const cell = el("div", "day" + (key === todayIso ? " is-today" : ""));
+      cell.append(el("div", "num", String(d)));
+      items.filter(i => i.dt === key).forEach(i => {
+        const c = el("div", "chip" + (i.tipo === "teste" ? " test" : i.tipo === "prazo" ? " due" : "") + (i.key && done[i.key] ? " done" : ""),
+          i.tipo === "prazo" ? "PRAZO" : i.tipo === "teste" ? "TESTE" : i.disc.sigla);
+        c.style.setProperty("--c", "var(--" + i.disc.id + ")");
+        c.title = i.disc.nome + ": " + i.txt;
+        cell.append(c);
+      });
+      grid.append(cell);
+    }
+    wrap.append(grid); box.append(wrap);
+  });
+}
+
+function renderAgenda() {
+  const box = document.getElementById("agenda"); box.textContent = "";
+  DISC.forEach(d => {
+    const sec = el("section", "disc"); sec.style.setProperty("--c", "var(--" + d.id + ")");
+    const h = el("header"); h.append(el("h3", null, d.nome), el("span", null, "Prazo final: " + fmt(d.prazo) + (d.ok ? " (confirmado)" : " (confirmar)")));
+    sec.append(h);
+    items.filter(i => i.disc === d).sort((a, b) => a.dt.localeCompare(b.dt)).forEach(i => {
+      if (i.tipo === "prazo") {
+        const r = el("div", "row is-due"); r.append(el("span"), el("span", "when", fmt(i.dt)), el("span", "what", i.txt)); sec.append(r); return;
+      }
+      const r = el("label", "row" + (i.tipo === "teste" ? " is-test" : "") + (done[i.key] ? " checked" : ""));
+      const cb = el("input"); cb.type = "checkbox"; cb.id = "cb-" + i.key; cb.checked = !!done[i.key];
+      cb.addEventListener("change", () => { if (cb.checked) done[i.key] = 1; else delete done[i.key]; save(); renderAll(); });
+      r.append(cb, el("span", "when", fmt(i.dt)), el("span", "what", i.txt)); sec.append(r);
+    });
+    box.append(sec);
+  });
+}
+
+function renderSummary() {
+  const feitas = sessoes.filter(s => done[s.key]).length;
+  document.getElementById("s-done").textContent = feitas + "/" + sessoes.length;
+  document.getElementById("s-hours").textContent = (sessoes.length - feitas) * 2 + "h";
+  document.getElementById("bar").style.width = (feitas / sessoes.length * 100) + "%";
+  const pend = sessoes.filter(s => !done[s.key]);
+  const lbl = document.getElementById("next-label"), t = document.getElementById("next-title"), det = document.getElementById("next-detail");
+  if (!pend.length) { lbl.textContent = "Plano concluído"; t.textContent = "Todas as sessões foram feitas"; det.textContent = ""; return; }
+  const n = pend[0], atras = pend.filter(s => s.dt < todayIso).length;
+  lbl.textContent = n.dt === todayIso ? "Sessão de hoje" : n.dt < todayIso ? "Sessão em atraso" : "Próxima sessão";
+  t.textContent = fmt(n.dt) + ", 20h às 22h: " + n.txt;
+  det.textContent = n.disc.nome + (atras > 1 ? ". " + atras + " sessões em atraso." : "");
+}
+
+function renderAll() { renderMonths(); renderAgenda(); renderSummary(); }
+renderLegend(); renderAll();
+</script>
