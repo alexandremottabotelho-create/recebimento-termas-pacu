@@ -44,19 +44,19 @@ online), que a PUCRS indica como guia de estudo para o teste.
 ## Plano de estudo — 2 horas por dia
 
 Premissas: cada aula tem até 4 vídeos de 45 min (3h); cada disciplina tem 3
-aulas (9h de vídeo) + 1h de Livro/revisão + 2h de teste. Estudo de segunda a
+aulas (9h de vídeo) + 3h de Livro e revisão + 2h de teste. Estudo de segunda a
 sábado, das 20h às 22h (horário de Brasília); domingo livre como folga ou
 reposição.
 
 | Disciplina | Carga restante | Sessões de estudo | Dia do teste | Prazo final | Folga |
 |---|---|---|---|---|---|
-| Otimização de Custos | 3h45 de vídeo + 1h15 de Livro + 2h de revisão + 2h de teste | 19, 20, 21 e 23/11 | 24/11 | 06/12/2026 | 12 dias |
-| IA, automação e IoT | 9h + 1h + 2h | 25, 26, 27, 28, 30/11 e 01/12 | 02/12 | 20/12/2026 (confirmar) | 18 dias |
-| Growth Hacking | 9h + 1h + 2h | 03, 04, 05, 07, 08 e 09/12 | 10/12 | 03/01/2027 (confirmar) | 24 dias |
-| Tax: Tributos Indiretos | 9h + 1h + 2h | 11, 12, 14, 15, 16 e 17/12 | 18/12 | 16/01/2027 (confirmar) | 29 dias |
-| Investimentos e Títulos ESG | 9h + 1h + 2h | 19, 21, 22, 23, 26 e 28/12 | 29/12 | 28/01/2027 (confirmar) | 30 dias |
+| Otimização de Custos | 3h45 de vídeo + 4h15 de Livro, revisão e simulado + 2h de teste | 19, 20, 21 e 23/11 | 24/11 | 06/12/2026 | 12 dias |
+| IA, automação e IoT | 9h de vídeo + 3h de Livro e revisão + 2h de teste | 25, 26, 27, 28, 30/11 e 01/12 | 02/12 | 20/12/2026 (confirmar) | 18 dias |
+| Growth Hacking | 9h de vídeo + 3h de Livro e revisão + 2h de teste | 03, 04, 05, 07, 08 e 09/12 | 10/12 | 03/01/2027 (confirmar) | 24 dias |
+| Tax: Tributos Indiretos | 9h de vídeo + 3h de Livro e revisão + 2h de teste | 11, 12, 14, 15, 16 e 17/12 | 18/12 | 16/01/2027 (confirmar) | 29 dias |
+| Investimentos e Títulos ESG | 9h de vídeo + 3h de Livro e revisão + 2h de teste | 19, 21, 22, 23, 26 e 28/12 | 29/12 | 28/01/2027 (confirmar) | 30 dias |
 
-Total: cerca de 57 horas em 33 sessões (28 de estudo + 5 de teste).
+Total: 66 horas em 33 sessões (28 de estudo + 5 de teste).
 
 ### Otimização de Custos, dia a dia
 
